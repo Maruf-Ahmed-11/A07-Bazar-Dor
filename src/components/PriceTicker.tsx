@@ -7,6 +7,7 @@ interface Product {
     id: number;
     nameBn: string;
     categoryIcon: string;
+    image: string; 
     unit: string;
     today: number;
     change: {
@@ -22,7 +23,7 @@ export default function PriceTicker() {
     useEffect(() => {
         async function fetchProducts() {
             try {
-                const response = await fetch("https://api.abcz.workers.dev/api/bazardor/products");
+                const response = await fetch("https://openapi.programming-hero.com/api/bazardor/products");
                 const data = await response.json();
                 setProducts(data);
             } catch (error) {
@@ -68,13 +69,12 @@ export default function PriceTicker() {
                     const changeText = toBn(product.change.pct);
 
                     return (
-                        // Changed <span> to <Link> and added hover effects
                         <Link
                             key={product.id}
                             href={`/product/${product.id}`}
                             className="flex items-center gap-1.5 px-6 border-r border-gray-200 cursor-pointer hover:bg-emerald-50 transition-colors shrink-0"
                         >
-                            <span className="text-base">{product.categoryIcon}</span>
+                            <span className="text-base">{product.image}</span>
                             <span className="text-gray-700 font-medium hover:text-emerald-700">{product.nameBn}</span>
                             <span className="text-gray-600">
                                 {toBn(product.today)} টাকা/{getUnitBn(product.unit)}
@@ -98,7 +98,8 @@ export default function PriceTicker() {
                             href={`/product/${product.id}`}
                             className="flex items-center gap-1.5 px-6 border-r border-gray-200 cursor-pointer hover:bg-emerald-50 transition-colors shrink-0"
                         >
-                            <span className="text-base">{product.categoryIcon}</span>
+                            {/* Changed categoryIcon to image */}
+                            <span className="text-base">{product.image}</span>
                             <span className="text-gray-700 font-medium hover:text-emerald-700">{product.nameBn}</span>
                             <span className="text-gray-600">
                                 {toBn(product.today)} টাকা/{getUnitBn(product.unit)}

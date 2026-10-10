@@ -1,18 +1,56 @@
+"use client";
+
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import { signIn } from "@/lib/auth-client"; 
 
 export default function SignInPage() {
+    const router = useRouter();
+
+    // Form State
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [loading, setLoading] = useState(false);
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+
+        await signIn.email({
+            email,
+            password,
+        }, {
+            onSuccess: () => {
+                toast.success("সফলভাবে সাইন ইন হয়েছে!");
+                setLoading(false); 
+                window.location.href = "/"; 
+            },
+            onError: (ctx) => {
+                toast.error(ctx.error.message || "ইমেইল বা পাসওয়ার্ড ভুল হয়েছে।");
+                setLoading(false);
+            }
+        });
+    };
+
+    const handleSocialLogin = async (provider: "google" | "github") => {
+        await signIn.social({
+            provider,
+            callbackURL: "/", 
+        });
+    };
+
     return (
         <div className="min-h-screen bg-[#f4f7f6] flex flex-col items-center justify-center px-4 py-12">
 
-            {/* Header Outside Card */}
             <div className="text-center mb-6">
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 mb-2">সাইন ইন</h1>
                 <p className="text-sm text-gray-500">বিস্তারিত দাম, বাজার তুলনা ও প্রোফাইল দেখতে অ্যাকাউন্টে ঢুকুন।</p>
             </div>
 
-            {/* Main Form Card */}
             <div className="bg-white w-full max-w-md rounded-[1rem] p-6 sm:p-8 shadow-sm border border-gray-100">
-                <form className="space-y-4">
+                <form onSubmit={handleLogin} className="space-y-4">
 
                     <div className="form-control">
                         <label className="label pt-0 pb-1.5">
@@ -20,6 +58,8 @@ export default function SignInPage() {
                         </label>
                         <input
                             type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             placeholder="you@example.com"
                             className="input input-bordered w-full rounded-lg focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
                             required
@@ -32,6 +72,8 @@ export default function SignInPage() {
                         </label>
                         <input
                             type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
                             placeholder="কমপক্ষে ৮ অক্ষর"
                             className="input input-bordered w-full rounded-lg focus:border-emerald-600 focus:outline-none focus:ring-1 focus:ring-emerald-600"
                             required
@@ -39,31 +81,42 @@ export default function SignInPage() {
                     </div>
 
                     <button
-                        type="button"
-                        className="btn w-full bg-[#059669] hover:bg-emerald-700 text-white border-none rounded-lg mt-2 font-bold"
+                        type="submit"
+                        disabled={loading}
+                        className="btn w-full bg-[#059669] hover:bg-emerald-700 text-white border-none rounded-lg mt-2 font-bold disabled:bg-emerald-700/60 disabled:text-white"
                     >
-                        সাইন ইন
+                        {loading ? <span className="loading loading-spinner loading-sm"></span> : "সাইন ইন"}
                     </button>
                 </form>
 
                 <div className="divider text-xs text-gray-400 my-6">অথবা</div>
 
-                {/* Social Login Buttons */}
                 <div className="flex flex-col sm:flex-row gap-3">
-                    <button type="button" className="btn flex-1 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-gray-700 font-medium shadow-none px-2 h-auto py-2.5 min-h-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-5 h-5 shrink-0">
-                            <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z" />
-                            <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z" />
-                            <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z" />
-                            <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z" />
+                    <button
+                        type="button"
+                        onClick={() => handleSocialLogin("google")}
+                        className="btn flex-1 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-gray-700 font-medium shadow-sm px-4 h-[42px] min-h-0 flex items-center justify-center gap-2"
+                    >
+                        {/* Official Google Brand SVG */}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" className="w-5 h-5">
+                            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.7 17.74 9.5 24 9.5z"/>
+                            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                         </svg>
-                        <span className="text-[13px] sm:text-sm">Google দিয়ে চালিয়ে যান</span>
+                        Google
                     </button>
-                    <button type="button" className="btn flex-1 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-gray-700 font-medium shadow-none px-2 h-auto py-2.5 min-h-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5 shrink-0">
-                            <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.161 22 16.416 22 12c0-5.523-4.477-10-10-10z" />
+
+                    <button
+                        type="button"
+                        onClick={() => handleSocialLogin("github")}
+                        className="btn flex-1 bg-white border border-gray-200 hover:bg-gray-50 hover:border-gray-300 rounded-lg text-gray-700 font-medium shadow-sm px-4 h-[42px] min-h-0 flex items-center justify-center gap-2"
+                    >
+                        {/* Official GitHub Brand SVG */}
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-5 h-5" fill="currentColor">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
                         </svg>
-                        <span className="text-[13px] sm:text-sm">GitHub দিয়ে চালিয়ে যান</span>
+                        GitHub
                     </button>
                 </div>
 
@@ -72,7 +125,6 @@ export default function SignInPage() {
                 </p>
             </div>
 
-            {/* Back Link */}
             <div className="mt-8">
                 <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 transition-colors">
                     ← হোম পেজে ফিরে যান

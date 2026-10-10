@@ -4,8 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-
-//typescript
+// Type Interfaces
 interface Market {
     market: string;
     division: string;
@@ -43,15 +42,17 @@ function ProductContent() {
 
         async function fetchProduct() {
             try {
-                const response = await fetch(`https://api.abcz.workers.dev/api/bazardor/products/${id}`);
-                const data = await response.json();
-                if (Array.isArray(data)) {
-                    setProduct(data[0] || null);
-                } else {
-                    setProduct(data || null);
-                }
+                // FIXED api
+                const response = await fetch("https://openapi.programming-hero.com/api/bazardor/products");
+                const data: Product[] = await response.json(); // Explicitly typed as Product[]
+
+                // Find the specific product that matches the URL (handles both ID or Slug)
+                const singleProduct = data.find((p: Product) => p.slug === id || p.id.toString() === id);
+
+                setProduct(singleProduct || null);
             } catch (error) {
                 console.error("Failed to fetch:", error);
+                setProduct(null);
             } finally {
                 setLoading(false);
             }
@@ -64,7 +65,7 @@ function ProductContent() {
     if (!loading && !product) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh]">
-                <h2 className="text-2xl font-bold">পণ্য পাওয়া যায়নি</h2>
+                <h2 className="text-2xl font-bold">পণ্য পাওয়া যায়নি</h2>
                 <Link href="/" className="text-emerald-700 mt-4 underline">হোম পেজে ফিরে যান</Link>
             </div>
         );
@@ -84,9 +85,9 @@ function ProductContent() {
             : avg.toLocaleString("bn-BD", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
-    const isUp = product?.change.dir === "up";
-    const isDown = product?.change.dir === "down";
-    const formattedChange = toBn(product?.change.pct);
+    const isUp = product?.change?.dir === "up";
+    const isDown = product?.change?.dir === "down";
+    const formattedChange = toBn(product?.change?.pct);
     const priceDiff = Math.abs((product?.today || 0) - (product?.yesterday || 0));
 
     let lowestPrice = product?.today;
@@ -119,9 +120,13 @@ function ProductContent() {
                         </div>
                         <div>
                             <h1 className="text-3xl font-extrabold text-gray-900 mb-1">{product?.nameBn}</h1>
-                            <p className="text-gray-500 text-sm mb-2">{getUnitBn(product?.unit)} • {product?.categoryNameBn}</p>
+
+                            <p className="text-gray-500 text-sm mb-2">
+                                {getUnitBn(product?.unit)} • {product?.categoryNameBn}
+                            </p>
+
                             <p className="text-sm font-medium text-gray-600">
-                                গতকালের তুলনায় আজ দাম <span className="font-bold text-gray-900">{isUp ? "বেড়েছে" : isDown ? "কমেছে" : "অপরিবর্তিত"}</span> - {toBn(priceDiff)} টাকা
+                                গতকালের তুলনায় আজ দাম <span className="font-bold text-gray-900">{isUp ? "বেড়েছে" : isDown ? "কমেছে" : "অপরিবর্তিত"}</span> {toBn(priceDiff)} টাকা
                             </p>
                         </div>
                     </div>
@@ -150,7 +155,7 @@ function ProductContent() {
                         <p className="text-xs text-gray-400 mt-1">সবচেয়ে বেশি দামের বাজার</p>
                     </div>
                     <div className="bg-white rounded-xl p-5 border border-gray-100 shadow-sm">
-                        <p className="text-sm text-gray-500 mb-1">গড় দাম</p>
+                        <p className="text-sm text-gray-500 mb-1">গড় দাম</p>
                         <p className="text-2xl font-bold text-emerald-600">{toBn(averagePrice)} <span className="text-sm font-normal text-gray-600">টাকা</span></p>
                         <p className="text-xs text-gray-400 mt-1">{product?.unit === 'kg' ? 'প্রতি কেজি-এর হিসাবে' : 'প্রতি পিস-এর হিসাবে'}</p>
                     </div>
@@ -167,7 +172,7 @@ function ProductContent() {
                                     <th className="p-4 font-medium whitespace-nowrap">বিভাগ</th>
                                     <th className="p-4 font-medium whitespace-nowrap">সর্বনিম্ন</th>
                                     <th className="p-4 font-medium whitespace-nowrap">সর্বাধিক</th>
-                                    <th className="p-4 font-medium text-right whitespace-nowrap">গড়</th>
+                                    <th className="p-4 font-medium text-right whitespace-nowrap">গড়</th>
                                 </tr>
                             </thead>
                             <tbody>

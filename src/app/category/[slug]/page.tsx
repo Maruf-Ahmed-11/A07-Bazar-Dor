@@ -26,12 +26,15 @@ function CategoryContent() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
 
+    // ADDED: Sorting State
+    const [sortOrder, setSortOrder] = useState<"default" | "asc" | "desc">("default");
+
     useEffect(() => {
         if (!slug) return;
 
         async function fetchCategoryProducts() {
             try {
-                const response = await fetch(`https://api.abcz.workers.dev/api/bazardor/products?category=${slug}`);
+                const response = await fetch(`https://openapi.programming-hero.com/api/bazardor/products?category=${slug}`);
                 const data = await response.json();
                 setProducts(data);
             } catch (error) {
@@ -67,8 +70,8 @@ function CategoryContent() {
     if (products.length === 0) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] px-4 text-center">
-                <h2 className="text-3xl font-bold text-gray-800 mb-3">পণ্য পাওয়া যায়নি</h2>
-                <p className="text-gray-500 mb-6">এই ক্যাটাগরিতে বর্তমানে কোনো পণ্য নেই বা লিংকটি সঠিক নয়।</p>
+                <h2 className="text-3xl font-bold text-gray-800 mb-3">পণ্য পাওয়া যায়নি</h2>
+                <p className="text-gray-500 mb-6">এই ক্যাটাগরিতে বর্তমানে কোনো পণ্য নেই বা লিংকটি সঠিক নয়。</p>
                 <Link href="/" className="btn bg-emerald-700 hover:bg-emerald-800 text-white border-none">
                     হোম পেজে ফিরে যান
                 </Link>
@@ -78,6 +81,13 @@ function CategoryContent() {
 
     const categoryName = products[0].categoryNameBn;
     const categoryIcon = products[0].categoryIcon;
+
+    // Sorting Logic based on the selected order
+    const sortedProducts = [...products].sort((a, b) => {
+        if (sortOrder === "asc") return a.today - b.today;
+        if (sortOrder === "desc") return b.today - a.today;
+        return 0; // Default
+    });
 
     return (
         <div className="w-full">
@@ -99,8 +109,23 @@ function CategoryContent() {
                     </p>
                 </div>
 
+                <div className="bg-white rounded-[1rem] p-4 shadow-sm border border-gray-100 mb-8 flex justify-end items-center">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-gray-600">সাজান</span>
+                        <select
+                            className="select select-bordered select-sm rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-1 focus:ring-emerald-600 text-gray-700 font-medium bg-gray-50"
+                            value={sortOrder}
+                            onChange={(e) => setSortOrder(e.target.value as "default" | "asc" | "desc")}
+                        >
+                            <option value="default">ডিফল্ট</option>
+                            <option value="asc">দাম: কম থেকে বেশি</option>
+                            <option value="desc">দাম: বেশি থেকে কম</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-                    {products.map((p) => (
+                    {sortedProducts.map((p) => (
                         <ProductCard
                             key={p.id}
                             id={p.id}
@@ -118,7 +143,7 @@ function CategoryContent() {
     );
 }
 
-// Wrap the component in Suspense to fix the Next.js prerendering block
+// Wraping the component in Suspense to fix the Next.js prerendering block
 export default function CategoryPage() {
     return (
         <Suspense fallback={

@@ -7,7 +7,6 @@ import PriceTicker from "@/components/PriceTicker";
 import { Suspense } from "react";
 import "./globals.css";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -21,22 +20,25 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="bn" data-theme="light">
-      <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
+    <html lang="en" data-theme="light">
+      <body className={inter.className}>
 
-        {/* Wraping Navbar in Suspense to fix the error */}
-        <Suspense fallback={<div className="h-[104px] w-full bg-white border-b border-gray-100"></div>}>
+        {/* Added Suspense Wrapper around Navbar */}
+        <Suspense fallback={<div className="h-20 bg-white border-b border-gray-100"></div>}>
           <Navbar />
         </Suspense>
 
         <PriceTicker />
 
-        <main className="flex-grow">
+        {/* Main Page Content */}
+        <main className="min-h-screen bg-[#f4f7f6]">
           {children}
         </main>
 
         <Footer />
-        <Toaster position="bottom-right" />
+
+        {/* Notifications */}
+        <Toaster position="top-center" />
       </body>
     </html>
   );

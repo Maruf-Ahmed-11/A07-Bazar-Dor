@@ -10,6 +10,7 @@ interface Product {
   id: number;
   nameBn: string;
   categoryIcon: string;
+  image: string; // Added image here
   unit: string;
   today: number;
   change: {
@@ -29,7 +30,7 @@ export default function Home() {
     // Fetch live products for the Home Page
     async function fetchProducts() {
       try {
-        const response = await fetch("https://api.abcz.workers.dev/api/bazardor/products");
+        const response = await fetch("https://openapi.programming-hero.com/api/bazardor/products");
         const data = await response.json();
         setProducts(data);
       } catch (error) {
@@ -64,7 +65,7 @@ export default function Home() {
     }
   };
 
-  // 1. Filter data based on the real API 'dir' value and limit to 8 items
+  //  Filter data based on the real API 'dir' value and limit to 8 items
   const priceIncreased = products.filter(p => p.change.dir === "up").slice(0, 8);
   const priceDecreased = products.filter(p => p.change.dir === "down").slice(0, 8);
 
@@ -82,7 +83,7 @@ export default function Home() {
               আজকের বাজারের দাম এক নজরে
             </h1>
             <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-8 max-w-lg">
-              চাল, ডাল, তেল, সবজি, মাছ, মাংস, ডিম ও মসলার দাম — বাজারভিত্তিক বিস্তারিত, গড়, সর্বনিম্ন-সর্বোচ্চ এবং দামের পরিবর্তন এক জায়গায়।
+              চাল, ডাল, তেল, সবজি, মাছ, মাংস, ডিম ও মসলার দাম — বাজারভিত্তিক বিস্তারিত, গড়, সর্বনিম্ন-সর্বোচ্চ এবং দামের পরিবর্তন এক জায়গায়।
             </p>
             <a href="#all-products" className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-sm">
               সব পণ্য দেখুন
@@ -108,7 +109,7 @@ export default function Home() {
               <section>
                 <div className="flex items-center gap-2 mb-6">
                   <span className="text-red-500 text-lg">▲</span>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম বেড়েছে</h2>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম বেড়েছে</h2>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                   {priceIncreased.map((p) => (
@@ -116,7 +117,7 @@ export default function Home() {
                       key={p.id}
                       id={p.id}
                       name={p.nameBn}
-                      icon={p.categoryIcon}
+                      icon={p.image} // Changed to p.image
                       unit={getUnitBn(p.unit)}
                       price={p.today}
                       changeRate={p.change.pct}
@@ -137,10 +138,10 @@ export default function Home() {
                       key={p.id}
                       id={p.id}
                       name={p.nameBn}
-                      icon={p.categoryIcon}
+                      icon={p.image} // Changed to p.image
                       unit={getUnitBn(p.unit)}
                       price={p.today}
-                      // We pass negative so ProductCard knows it's a decrease
+                      // pass negative so ProductCard knows it's a decrease
                       changeRate={-p.change.pct}
                     />
                   ))}
@@ -159,7 +160,7 @@ export default function Home() {
                       key={p.id}
                       id={p.id}
                       name={p.nameBn}
-                      icon={p.categoryIcon}
+                      icon={p.image} // Changed to p.image
                       unit={getUnitBn(p.unit)}
                       price={p.today}
                       changeRate={p.change.dir === 'down' ? -p.change.pct : p.change.pct}
