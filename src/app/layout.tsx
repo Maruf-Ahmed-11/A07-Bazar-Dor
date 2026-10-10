@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
-import "./globals.css";
 import Navbar from "@/components/Navbar";
 import PriceTicker from "@/components/PriceTicker";
+import { Suspense } from "react";
+import "./globals.css";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,8 +23,14 @@ export default function RootLayout({
   return (
     <html lang="bn" data-theme="light">
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        <Navbar />
+
+        {/* Wraping Navbar in Suspense to fix the error */}
+        <Suspense fallback={<div className="h-[104px] w-full bg-white border-b border-gray-100"></div>}>
+          <Navbar />
+        </Suspense>
+
         <PriceTicker />
+
         <main className="flex-grow">
           {children}
         </main>
