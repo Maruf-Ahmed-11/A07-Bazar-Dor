@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import Footer from "@/components/Footer";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import PriceTicker from "@/components/PriceTicker";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,8 +21,8 @@ export default function RootLayout({
   return (
     <html lang="bn" data-theme="light">
       <body className={`${inter.className} min-h-screen flex flex-col bg-gray-50`}>
-        {/* We will add Navbar and PriceTicker here in the next step */}
         <Navbar />
+        <PriceTicker />
         <main className="flex-grow">
           {children}
         </main>
