@@ -5,27 +5,41 @@ import heroImage from "@/assets/bazar-hero.png";
 import ProductCard from "@/components/ProductCard";
 import { useState, useEffect } from "react";
 
-// Placeholder data - HAve to replace this with real API data later
-const dummyProducts = [
-  { id: "1", name: "পেঁয়াজ", unit: "প্রতি কেজি", price: 54, changeRate: 12.5, icon: "🧅" },
-  { id: "2", name: "আদা", unit: "প্রতি কেজি", price: 85, changeRate: 9.0, icon: "🫚" },
-  { id: "3", name: "বেগুন", unit: "প্রতি কেজি", price: 44, changeRate: 4.8, icon: "🍆" },
-  { id: "4", name: "রুই মাছ", unit: "প্রতি কেজি", price: 450, changeRate: 4.5, icon: "🐟" },
-  { id: "5", name: "ডিম", unit: "প্রতি ডজন", price: 155, changeRate: 3.9, icon: "🥚" },
-  { id: "6", name: "মাখন (৫০০ গ্রাম)", unit: "প্রতি পিস", price: 545, changeRate: 3.6, icon: "🧈" },
-  { id: "7", name: "কাঁচামরিচ", unit: "প্রতি কেজি", price: 92, changeRate: -12.8, icon: "🌶️" },
-  { id: "8", name: "রসুন", unit: "প্রতি কেজি", price: 125, changeRate: -7.4, icon: "🧄" },
-  { id: "9", name: "আলু", unit: "প্রতি কেজি", price: 30, changeRate: -6.2, icon: "🥔" },
-  { id: "10", name: "কাতলা মাছ", unit: "প্রতি কেজি", price: 430, changeRate: -4.4, icon: "🐟" },
-  { id: "11", name: "হাঁসের মাংস", unit: "প্রতি কেজি", price: 585, changeRate: -3.4, icon: "🦆" },
-  { id: "12", name: "খাসির মাংস", unit: "প্রতি কেজি", price: 1290, changeRate: -3.0, icon: "🥩" },
-];
+// The API product structure
+interface Product {
+  id: number;
+  nameBn: string;
+  categoryIcon: string;
+  unit: string;
+  today: number;
+  change: {
+    dir: string;
+    pct: number;
+  };
+}
 
 export default function Home() {
   const [isMounted, setIsMounted] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsMounted(true), 1);
+
+    // Fetch live products for the Home Page
+    async function fetchProducts() {
+      try {
+        const response = await fetch("https://api.abcz.workers.dev/api/bazardor/products");
+        const data = await response.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Failed to fetch home page products:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchProducts();
     return () => clearTimeout(timer);
   }, []);
 
@@ -38,15 +52,27 @@ export default function Home() {
     }).format(new Date())
     : "লোড হচ্ছে...";
 
-  // Filtering data for the specific sections
-  const priceIncreased = dummyProducts.filter(p => p.changeRate > 0).slice(0, 6);
-  const priceDecreased = dummyProducts.filter(p => p.changeRate < 0).slice(0, 6);
+  // Helper to translate units
+  const getUnitBn = (unit: string) => {
+    switch (unit.toLowerCase()) {
+      case "kg": return "প্রতি কেজি";
+      case "l":
+      case "liter": return "প্রতি লিটার";
+      case "dozen": return "প্রতি ডজন";
+      case "hali": return "প্রতি হালি";
+      default: return "প্রতি পিস";
+    }
+  };
+
+  // 1. Filter data based on the real API 'dir' value and limit to 8 items
+  const priceIncreased = products.filter(p => p.change.dir === "up").slice(0, 8);
+  const priceDecreased = products.filter(p => p.change.dir === "down").slice(0, 8);
 
   return (
     <div className="w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
 
-        {/* Hero / Banner Section */}
+        {/* Hero Section */}
         <section className="bg-[#f0fdf4] rounded-[2rem] p-6 sm:p-12 flex flex-col-reverse md:flex-row items-center justify-between gap-8 border border-emerald-50">
           <div className="flex-1 flex flex-col items-start text-left">
             <div className="bg-emerald-100 text-emerald-800 text-xs sm:text-sm font-semibold px-4 py-1.5 rounded-full mb-6 min-h-[28px]">
@@ -72,44 +98,77 @@ export default function Home() {
         {/* Product Sections */}
         <div id="all-products" className="mt-16 space-y-16">
 
-          {/* Section A: Price Increased */}
-          <section>
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-red-500 text-lg">▲</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম বেড়েছে</h2>
+          {loading ? (
+            <div className="flex justify-center py-20">
+              <span className="loading loading-spinner text-emerald-700 loading-lg"></span>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {priceIncreased.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
-            </div>
-          </section>
+          ) : (
+            <>
+              {/* Section A: Price Increased */}
+              <section>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="text-red-500 text-lg">▲</span>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম বেড়েছে</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {priceIncreased.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      id={p.id}
+                      name={p.nameBn}
+                      icon={p.categoryIcon}
+                      unit={getUnitBn(p.unit)}
+                      price={p.today}
+                      changeRate={p.change.pct}
+                    />
+                  ))}
+                </div>
+              </section>
 
-          {/* Section B: Price Decreased */}
-          <section>
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-emerald-600 text-lg">▼</span>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম কমেছে</h2>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {priceDecreased.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
-            </div>
-          </section>
+              {/* Section B: Price Decreased */}
+              <section>
+                <div className="flex items-center gap-2 mb-6">
+                  <span className="text-emerald-600 text-lg">▼</span>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">আজ দাম কমেছে</h2>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {priceDecreased.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      id={p.id}
+                      name={p.nameBn}
+                      icon={p.categoryIcon}
+                      unit={getUnitBn(p.unit)}
+                      price={p.today}
+                      // We pass negative so ProductCard knows it's a decrease
+                      changeRate={-p.change.pct}
+                    />
+                  ))}
+                </div>
+              </section>
 
-          {/* Section C: All Products */}
-          <section>
-            <div className="mb-6 border-b border-gray-100 pb-4">
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">সব পণ্য</h2>
-              <p className="text-sm text-gray-500">মোট ১২টি পণ্য দেখানো হচ্ছে</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {dummyProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
-            </div>
-          </section>
+              {/* Section C: All Products */}
+              <section>
+                <div className="mb-6 border-b border-gray-100 pb-4">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">সব পণ্য</h2>
+                  <p className="text-sm text-gray-500">মোট {products.length.toLocaleString("bn-BD")}টি পণ্য দেখানো হচ্ছে</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+                  {products.map((p) => (
+                    <ProductCard
+                      key={p.id}
+                      id={p.id}
+                      name={p.nameBn}
+                      icon={p.categoryIcon}
+                      unit={getUnitBn(p.unit)}
+                      price={p.today}
+                      changeRate={p.change.dir === 'down' ? -p.change.pct : p.change.pct}
+                    />
+                  ))}
+                </div>
+              </section>
+            </>
+          )}
 
         </div>
       </div>
