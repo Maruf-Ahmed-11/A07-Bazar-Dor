@@ -97,7 +97,14 @@ export default function Navbar() {
                             <div tabIndex={0} role="button" className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded-md transition-colors">
                                 <div className="w-8 h-8 relative rounded-full bg-gray-200 overflow-hidden shadow-sm">
                                     {session.user.image ? (
-                                        <img src={session.user.image} alt="User Avatar" className="w-full h-full object-cover" />
+                                        <Image
+                                            src={session.user.image}
+                                            alt="User Avatar"
+                                            fill
+                                            className="object-cover"
+                                            sizes="32px"
+                                            referrerPolicy="no-referrer"
+                                        />
                                     ) : (
                                         <Image src="/avatar.png" alt="User Avatar" fill className="object-cover" sizes="32px" />
                                     )}

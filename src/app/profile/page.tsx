@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 import { useSession, signOut, authClient } from "@/lib/auth-client";
+import Image from "next/image";
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -98,9 +99,16 @@ export default function ProfilePage() {
                 <div className="bg-white rounded-[1rem] p-6 sm:p-8 shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row items-center sm:justify-between gap-6">
 
                     <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 text-center sm:text-left">
-                        <div className="w-20 h-20 sm:w-16 sm:h-16 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-100">
+                        <div className="w-20 h-20 sm:w-16 sm:h-16 relative rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-100">
                             {session?.user?.image ? (
-                                <img src={session.user.image} alt={session?.user?.name || "User"} className="w-full h-full object-cover" />
+                                <Image
+                                    src={session.user.image}
+                                    alt={session?.user?.name || "User"}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 640px) 80px, 64px"
+                                    referrerPolicy="no-referrer"
+                                />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center bg-emerald-700 text-white font-bold text-2xl sm:text-xl">
                                     {session?.user?.name?.charAt(0).toUpperCase()}
