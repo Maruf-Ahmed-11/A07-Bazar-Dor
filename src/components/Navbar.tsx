@@ -70,7 +70,7 @@ export default function Navbar() {
 
                 {/* Left: Logo & Date */}
                 <Link href="/" className="flex items-center gap-3">
-                    <div className="w-10 h-10 relative bg-emerald-700 rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
+                    <div className="w-10 h-10 relative bg-emerald-700 rounded-lg flex items-center justify-center shrink-0">
                         <Image
                             src={logoIcon}
                             alt="বাজার দর Logo"
