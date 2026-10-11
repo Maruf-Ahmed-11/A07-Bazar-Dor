@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Toaster } from "react-hot-toast";
+import ToasterProvider from "@/components/ToasterProvider";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import PriceTicker from "@/components/PriceTicker";
@@ -24,21 +24,18 @@ export default function RootLayout({
       <body className={inter.className}>
 
         {/* Added Suspense Wrapper around Navbar */}
+        <ToasterProvider />
         <Suspense fallback={<div className="h-20 bg-white border-b border-gray-100"></div>}>
           <Navbar />
         </Suspense>
 
         <PriceTicker />
-
         {/* Main Page Content */}
         <main className="min-h-screen bg-[#f4f7f6]">
           {children}
         </main>
 
         <Footer />
-
-        {/* Notifications */}
-        <Toaster position="top-center" />
       </body>
     </html>
   );
